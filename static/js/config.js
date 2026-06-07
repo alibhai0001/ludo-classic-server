@@ -1,2 +1,3 @@
-/** Central online server — kahi se bhi connect, no IP / no WiFi */
-window.LUDO_SERVER = 'https://ludo-classic.onrender.com';
+/** Auto-updated by go_online.py — laptop tunnel URL */
+window.LUDO_SERVER = 'https://creates-closed-tune-lower.trycloudflare.com';
+window.LUDO_USE_GITHUB = true;
