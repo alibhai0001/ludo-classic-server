@@ -4,7 +4,7 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT --timeout 120 server:app
+    startCommand: python server.py
     healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
