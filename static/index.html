@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Ludo Classic — Play Online</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div id="app">
+    <section id="screen-home" class="screen active">
+      <div class="logo">🎲 LUDO CLASSIC</div>
+      <p class="tagline">Online multiplayer • Kahi se bhi join karo • Sirf Room ID</p>
+      <span id="online-status" class="online-badge offline">🔴 Connecting...</span>
+      <div class="card">
+        <button class="btn primary" id="btn-create">Create Room</button>
+        <div class="divider">OR</div>
+        <input id="join-code" type="text" maxlength="8" placeholder="Room ID (e.g. ABC123)" style="text-transform:uppercase" />
+        <button class="btn secondary" id="btn-join">Join Room</button>
+      </div>
+      <p class="hint">🌍 Internet chahiye • Same WiFi / IP ki zaroorat nahi</p>
+    </section>
+
+    <div id="name-modal" class="modal hidden">
+      <div class="modal-card">
+        <h3>What's your name?</h3>
+        <p class="modal-sub">Dosto ke saath khelne ke liye naam daalo</p>
+        <input id="player-name" type="text" maxlength="20" placeholder="Your name" autofocus />
+        <button class="btn primary" id="btn-name-confirm">Let's Go! 🎲</button>
+      </div>
+    </div>
+
+    <section id="screen-lobby" class="screen">
+      <div class="lobby-header">
+        <h2>Lobby</h2>
+        <div class="room-code">Room: <span id="lobby-room-id">------</span>
+          <button class="btn tiny" id="btn-copy-code">Copy</button>
+        </div>
+      </div>
+      <p class="share-hint">Room ID kisi ko bhi bhejo — wo duniya mein kahin se join kar sakta hai</p>
+      <ul id="player-list" class="player-list"></ul>
+      <button class="btn primary" id="btn-start" disabled>Start Game (need 2+ players)</button>
+      <button class="btn ghost" id="btn-leave-lobby">Leave</button>
+    </section>
+
+    <section id="screen-game" class="screen">
+      <div class="game-top">
+        <span id="turn-label">Waiting...</span>
+        <div id="dice-display" class="dice-box">🎲</div>
+        <button class="btn tiny" id="btn-roll" disabled>Roll</button>
+      </div>
+      <div id="board" class="board"></div>
+      <div id="winner-banner" class="winner-banner hidden"></div>
+      <div class="game-bottom">
+        <div class="voice-bar">
+          <button class="btn tiny" id="btn-mic" title="Mic">🎤 Mic</button>
+          <button class="btn tiny" id="btn-speaker" title="Speaker">🔊 Speaker</button>
+          <span id="voice-status" class="voice-status">Voice: tap mic to enable</span>
+        </div>
+        <div class="reaction-bar">
+          <button class="emoji-btn" data-emoji="😂">😂</button>
+          <button class="emoji-btn" data-emoji="🔥">🔥</button>
+          <button class="emoji-btn" data-emoji="👏">👏</button>
+          <button class="emoji-btn" data-emoji="😎">😎</button>
+          <button class="emoji-btn" data-emoji="💀">💀</button>
+          <button class="emoji-btn" data-emoji="🤡">🤡</button>
+          <button class="emoji-btn" data-emoji="😭">😭</button>
+          <button class="emoji-btn" data-emoji="🤑">🤑</button>
+          <button class="emoji-btn" data-emoji="💪">💪</button>
+          <button class="emoji-btn" data-emoji="🎯">🎯</button>
+          <button class="sticker-btn" data-sticker="🎉 PARTY!">🎉</button>
+          <button class="sticker-btn" data-sticker="😱 NOOO!">😱</button>
+          <button class="sticker-btn" data-sticker="🏆 GG!">🏆</button>
+          <button class="sticker-btn" data-sticker="🙈 Oops!">🙈</button>
+          <button class="sticker-btn" data-sticker="😤 Unlucky!">😤</button>
+          <button class="sticker-btn" data-sticker="🐍 Snake eyes!">🐍</button>
+          <button class="sticker-btn" data-sticker="👑 King move!">👑</button>
+          <button class="sticker-btn" data-sticker="💥 BOOM!">💥</button>
+        </div>
+      </div>
+      <div id="reactions-layer" class="reactions-layer"></div>
+    </section>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="/js/config.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="/js/board.js"></script>
+  <script src="/js/voice.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
