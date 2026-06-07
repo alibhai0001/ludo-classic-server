@@ -26,38 +26,82 @@ function toast(msg) {
   setTimeout(() => t.classList.add('hidden'), 3000);
 }
 
-function getServerUrl() {
-  if (window.LUDO_SERVER) return window.LUDO_SERVER;
+const GITHUB_SERVER_URL =
+  'https://raw.githubusercontent.com/alibhai0001/ludo-classic-server/main/server-url.txt';
+
+async function resolveServerUrl() {
+  if (window.LUDO_SERVER && !window.LUDO_USE_GITHUB) return window.LUDO_SERVER;
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     return window.location.origin;
   }
-  return window.location.origin;
+  const candidates = [];
+  if (window.LUDO_USE_GITHUB !== false) {
+    try {
+      const r = await fetch(`${GITHUB_SERVER_URL}?t=${Date.now()}`, { cache: 'no-store' });
+      if (r.ok) {
+        const url = (await r.text()).trim().split('\n')[0].trim();
+        if (url.startsWith('http')) candidates.push(url.replace(/\/$/, ''));
+      }
+    } catch (_) {}
+  }
+  if (window.LUDO_SERVER) candidates.push(window.LUDO_SERVER.replace(/\/$/, ''));
+  candidates.push(window.location.origin.replace(/\/$/, ''));
+  return [...new Set(candidates)];
 }
 
-function connectSocket() {
+async function pickLiveServer(urls) {
+  for (const url of urls) {
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 6000);
+      const r = await fetch(`${url}/health`, { cache: 'no-store', signal: ctrl.signal });
+      clearTimeout(t);
+      if (r.ok) return url;
+    } catch (_) {}
+  }
+  return urls[0];
+}
+
+function connectSocket(url) {
   if (socket) socket.disconnect();
-  const url = getServerUrl();
   socket = io(url, {
-    transports: ['websocket', 'polling'],
+    transports: ['polling', 'websocket'],
     reconnection: true,
-    reconnectionAttempts: 8,
-    timeout: 20000
+    reconnectionAttempts: 20,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 4000,
+    timeout: 10000
   });
-  socket.on('connect', () => setOnlineStatus(true));
-  socket.on('disconnect', () => setOnlineStatus(false));
+  socket.on('connect', () => setOnlineStatus('online'));
+  socket.on('disconnect', () => setOnlineStatus('offline'));
   socket.on('connect_error', () => {
-    setOnlineStatus(false);
-    toast('Connecting to online server...');
+    setOnlineStatus('connecting');
+    toast('Server se connect ho raha hai...');
   });
   socket.on('error_msg', (d) => toast(d.message));
   return socket;
 }
 
-function setOnlineStatus(on) {
+function setOnlineStatus(state) {
   const el = $('online-status');
   if (!el) return;
-  el.textContent = on ? '🟢 Online' : '🔴 Connecting...';
-  el.className = on ? 'online-badge online' : 'online-badge offline';
+  const map = {
+    finding: ['🔍 Server dhoondh rahe hain...', 'offline'],
+    connecting: ['🟡 Connecting...', 'offline'],
+    online: ['🟢 Online — khel sakte ho!', 'online'],
+    offline: ['🔴 Disconnected', 'offline']
+  };
+  const [text, cls] = map[state] || map.connecting;
+  el.textContent = text;
+  el.className = `online-badge ${cls}`;
+}
+
+async function bootOnline() {
+  setOnlineStatus('finding');
+  const urls = await resolveServerUrl();
+  setOnlineStatus('connecting');
+  const live = await pickLiveServer(urls);
+  connectSocket(live);
 }
 
 function showNameModal() {
@@ -98,7 +142,6 @@ $('btn-name-confirm').onclick = () => {
   const action = pendingAction;
   const joinCode = pendingJoinCode;
   pendingAction = null;
-  connectSocket();
 
   const joinFlow = () => {
     if (action === 'create') {
@@ -297,4 +340,4 @@ function showReaction(r) {
   setTimeout(() => el.remove(), 2500);
 }
 
-connectSocket();
+bootOnline();
